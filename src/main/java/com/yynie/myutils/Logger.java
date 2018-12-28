@@ -35,7 +35,7 @@ import android.util.Log;
  * More powerful level controller provided.
  * Easy to use.
  *
- * @author yy_nie@hotmail.com
+ * @author <a href="mailto:yy_nie@hotmail.com">Yan.Nie</a>
  * */
 public class Logger {
 

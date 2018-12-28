@@ -32,7 +32,7 @@ package com.yynie.myutils;
  * A simplified utility class that provides several frequently-used method
  * in String comparing and empty checking
  *
- * @author yy_nie@hotmail.com
+ * @author <a href="mailto:yy_nie@hotmail.com">Yan.Nie</a>
  * */
 public class StringUtils {
 
