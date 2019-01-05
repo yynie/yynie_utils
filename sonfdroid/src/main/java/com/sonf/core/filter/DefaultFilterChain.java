@@ -17,8 +17,9 @@ import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
 public class DefaultFilterChain implements IFilterChain {
-    public static final AttributeKey SESSION_CREATED_FUTURE = new AttributeKey(DefaultFilterChain.class,
-            "connectFuture");
+    public static final AttributeKey SESSION_CREATED_FUTURE = new AttributeKey(DefaultFilterChain.class, "connectFuture");
+    public static final AttributeKey SESSION_DECODER_OUT = new AttributeKey(DefaultFilterChain.class, "decoderOut");
+    public static final AttributeKey SESSION_ENCODER_OUT = new AttributeKey(DefaultFilterChain.class, "encoderOut");
     private final AbstractIOSession session;
     /** The chain head */
     private final EntryImpl head;
@@ -54,6 +55,11 @@ public class DefaultFilterChain implements IFilterChain {
     public synchronized void addLast(String name, IFilter filter) {
         checkAddable(name);
         register(tail.prevEntry, name, filter);
+    }
+
+    @Override
+    public boolean contains(IFilter filter) {
+        return getEntry(filter) != null;
     }
 
     @Override
@@ -118,8 +124,14 @@ public class DefaultFilterChain implements IFilterChain {
     }
 
     private void callNextSessionClosed(Entry entry, IOSession session) {
-        IFilter filter = entry.getFilter();
-        filter.sessionClosed(entry.getNextEntry(), session);
+        try {
+            IFilter filter = entry.getFilter();
+            filter.sessionClosed(entry.getNextEntry(), session);
+        }catch (Exception e) {
+            fireExceptionCaught(e);
+        } catch (Error e) {
+            fireExceptionCaught(e);
+        }
     }
 
     private void callNextExceptionCaught(Entry entry, IOSession session, Throwable cause) {
@@ -248,6 +260,18 @@ public class DefaultFilterChain implements IFilterChain {
         }
     }
 
+    private Entry getEntry(IFilter filter) {
+        EntryImpl e = head.nextEntry;
+
+        while (e != tail) {
+            if (e.getFilter() == filter) {
+                return e;
+            }
+            e = e.nextEntry;
+        }
+        return null;
+    }
+
     private class HeadFilter extends IFilterAdapter{
         @Override
         public void filterClose(Entry next, IOSession session) {
@@ -256,6 +280,9 @@ public class DefaultFilterChain implements IFilterChain {
         @Override
         public void filterWrite(IFilterChain.Entry next, IOSession session, IWritePacket writePacket) throws Exception {
             Object message = writePacket.getMessage();
+            if(message == null){
+                throw new IOException("empty message should not be sent");
+            }
             if(message instanceof IoBuffer){
                 AbstractIOSession s = (AbstractIOSession) session;
                 s.getWriteQueue().offer(writePacket);
@@ -282,6 +309,8 @@ public class DefaultFilterChain implements IFilterChain {
         public void sessionClosed(Entry next, IOSession session) {
             session.setStateClosed();
             session.getFilterChain().clear();
+            session.removeAttribute(SESSION_DECODER_OUT);
+            session.removeAttribute(SESSION_ENCODER_OUT);
             session.getController().getHandler().sessionClosed(session);
         }
 

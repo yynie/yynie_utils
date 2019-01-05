@@ -37,7 +37,7 @@ public class IFilterAdapter implements IFilter {
     }
 
     @Override
-    public void sessionClosed(IFilterChain.Entry next, IOSession session) {
+    public void sessionClosed(IFilterChain.Entry next, IOSession session) throws Exception {
         next.getFilter().sessionClosed(next.getNextEntry(), session);
     }
 
@@ -57,13 +57,13 @@ public class IFilterAdapter implements IFilter {
     }
 
     @Override
-    public void filterClose(IFilterChain.Entry next, IOSession session) {
-        next.getFilter().filterClose(next.getPrevEntry(), session);
+    public void filterClose(IFilterChain.Entry prev, IOSession session) {
+        prev.getFilter().filterClose(prev.getPrevEntry(), session);
     }
 
     @Override
-    public void filterWrite(IFilterChain.Entry next, IOSession session, IWritePacket writePacket) throws Exception {
-        next.getFilter().filterWrite(next.getPrevEntry(), session, writePacket);
+    public void filterWrite(IFilterChain.Entry prev, IOSession session, IWritePacket writePacket) throws Exception {
+        prev.getFilter().filterWrite(prev.getPrevEntry(), session, writePacket);
     }
 
     @Override

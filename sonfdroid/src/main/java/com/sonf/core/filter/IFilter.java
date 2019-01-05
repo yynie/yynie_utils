@@ -69,7 +69,7 @@ public interface IFilter {
      * @param session The {@link IOSession} which has received this event
      * @throws Exception If an error occurred while processing the event
      */
-    void sessionClosed(Entry next, IOSession session);
+    void sessionClosed(Entry next, IOSession session) throws Exception;
 
     /**
      * Filters {@link IOHandler#exceptionCaught(IOSession,Throwable)} event.
@@ -102,23 +102,23 @@ public interface IFilter {
     /**
      * Filters {@link IOSession#closeNow()} or a {@link IOSession#closeOnFlush()} method invocations.
      *
-     * @param next next filter entry
+     * @param prev prev filter entry
      * @param session
      *            The {@link IOSession} which has to process this method
      *            invocation
      * @throws Exception If an error occurred while processing the event
      */
-    void filterClose(Entry next, IOSession session);
+    void filterClose(Entry prev, IOSession session);
 
     /**
      * Filters {@link IOSession#write(Object)} method invocation.
      *
-     * @param next next filter entry
+     * @param prev prev filter entry
      * @param session The {@link IOSession} which has to process this invocation
      * @param writePacket The {@link IWritePacket} to process
      * @throws Exception If an error occurred while processing the event
      */
-    void filterWrite(Entry next, IOSession session, IWritePacket writePacket) throws Exception;
+    void filterWrite(Entry prev, IOSession session, IWritePacket writePacket) throws Exception;
 
     /**
      * Filters {@link IOHandler#messageReceived(IOSession,Object)} event.

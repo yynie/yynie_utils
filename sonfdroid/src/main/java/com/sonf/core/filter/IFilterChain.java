@@ -19,6 +19,13 @@ public interface IFilterChain {
     void addLast(String name, IFilter filter);
 
     /**
+     * @param filter The filter we are looking for
+     *
+     * @return <tt>true</tt> if this chain contains the specified <tt>filter</tt>.
+     */
+    boolean contains(IFilter filter);
+
+    /**
      * Removes all filters added to this chain.
      */
     void clear();
