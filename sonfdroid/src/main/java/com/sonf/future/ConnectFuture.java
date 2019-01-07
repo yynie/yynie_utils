@@ -4,12 +4,23 @@ import com.sonf.core.future.DefaultIOFuture;
 import com.sonf.core.future.IConnectFuture;
 import com.sonf.core.session.IOSession;
 
+/**
+ * Inheriting class of {@link DefaultIOFuture} used for an async connect request
+ */
 public class ConnectFuture extends DefaultIOFuture implements IConnectFuture {
 
+    /**
+     * Constructor
+     *
+     * @param session the associated session
+     */
     public ConnectFuture(IOSession session) {
         super(session);
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public boolean cancel() {
         if (!isDone()) {
@@ -21,6 +32,9 @@ public class ConnectFuture extends DefaultIOFuture implements IConnectFuture {
         return true;
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public void setConnected(){
         if (!isDone()) {
@@ -28,6 +42,9 @@ public class ConnectFuture extends DefaultIOFuture implements IConnectFuture {
         }
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public boolean isConnected() {
         Object value = getValue();
@@ -38,6 +55,9 @@ public class ConnectFuture extends DefaultIOFuture implements IConnectFuture {
         return false;
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public boolean isCanceled() {
         Object value = getValue();

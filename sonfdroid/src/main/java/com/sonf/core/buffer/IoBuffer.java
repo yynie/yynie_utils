@@ -7,25 +7,37 @@ import java.nio.charset.CharsetEncoder;
 
 public abstract class IoBuffer {
     /**
-     * Returns the direct or heap buffer which is capable to store the specified
-     * amount of bytes.
+     * Allocate a direct or heap buffer
      *
      * @param capacity the capacity of the buffer
-     * @return a IoBuffer which can hold up to capacity bytes
-     *
      */
-    public IoBuffer allocate(int capacity) {
+    public void allocate(int capacity) {
         if (capacity < 0) {
             throw new IllegalArgumentException("capacity: " + capacity);
         }
-        ByteBuffer buf = allocateNioBuffer(capacity, false);
-        return wrap(buf);
+        ByteBuffer buf = allocateByteBuffer(capacity, false);
+        wrap(buf);
     }
 
-    protected abstract ByteBuffer allocateNioBuffer(int capacity, boolean direct);
+    /**
+     * allocate a ByteBuffer
+     *
+     * @param capacity  the capacity of the buffer
+     * @param direct  direct or heap buffer
+     * @return allocated ByteBuffer instance
+     */
+    protected abstract ByteBuffer allocateByteBuffer(int capacity, boolean direct);
 
-    protected abstract IoBuffer wrap(ByteBuffer buf);
+    /**
+     * wrap a ByteBuffer into IoBuffer instance
+     *
+     * @param buf the ByteBuffer
+     */
+    protected abstract void wrap(ByteBuffer buf);
 
+    /**
+     * @return if the IoBuffer can be used
+     */
     public boolean available(){
         return (buf() != null);
     }
@@ -64,20 +76,24 @@ public abstract class IoBuffer {
     public void free() {
     }
 
+    /**
+     * @see java.nio.Buffer#flip()
+     *
+     * @return the modified IoBuffer
+     */
     public void clear(){
         buf().clear();
     }
 
     /**
-     * @return the underlying NIO {@link ByteBuffer} instance.
+     * @return the underlying {@link ByteBuffer} instance.
      */
     public abstract ByteBuffer buf();
 
     /**
      * @see java.nio.Buffer#limit()
      *
-     * @return the modified IoBuffer
-    's limit
+     * @return the modified IoBuffer 's limit
      */
     public int limit(){
         return buf().limit();
@@ -96,15 +112,22 @@ public abstract class IoBuffer {
 
     /**
      * @see java.nio.Buffer#position()
+     *
      * @return The current position in the buffer
      */
     public int position(){
         return buf().position();
     }
 
+    /**
+     * @see ByteBuffer#capacity()
+     *
+     * @return the buffer capacity
+     */
     public int capacity(){
         return buf().capacity();
     }
+
     /**
      * @see java.nio.Buffer#position(int)
      *
@@ -141,9 +164,8 @@ public abstract class IoBuffer {
     public abstract byte get(int index);
 
     /**
-     * Reads a <code>NUL</code>-terminated string from this buffer using the
-     * specified <code>decoder</code> and returns it. This method reads until
-     * the limit of this buffer if no <tt>NUL</tt> is found.
+     * Read a string from this buffer using the specified <code>decoder</code> and returns it.
+     * This method reads until the limit of this buffer if no <tt>NUL</tt> is found.
      *
      * @param decoder The {@link CharsetDecoder} to use
      * @return the read String
@@ -152,9 +174,8 @@ public abstract class IoBuffer {
     public abstract String getString(CharsetDecoder decoder) throws CharacterCodingException;
 
     /**
-     * Writes the content of <code>in</code> into this buffer using the
-     * specified <code>encoder</code>. This method doesn't terminate string with
-     * <tt>NUL</tt>. You have to do it by yourself.
+     * Writes the content of specified CharSequence into this buffer using the
+     * specified <code>encoder</code>.
      *
      * @param val The CharSequence to put in the IoBuffer
      * @param encoder The CharsetEncoder to use

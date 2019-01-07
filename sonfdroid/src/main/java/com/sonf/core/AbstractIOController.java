@@ -13,31 +13,30 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
 
+/**
+ * A implementation of {@link IOController} with some basic functions fulfilled.
+ */
 public abstract class AbstractIOController<S extends AbstractIOSession> implements IOController<S> {
     private Logger log = Logger.get(AbstractPollingIoProcessor.class, Logger.Level.INFO);
-    private Executor executor;
+
     /**
-     * A flag used to indicate that the local executor has been created
-     * inside this instance, and not passed by a caller.
-     *
-     * If the executor is locally created, then it will be an instance
-     * of the ThreadPoolExecutor class.
+     * IOController should keep a executor which will handle or the Runnable thread created
+     * in this controller.
+     * */
+    private Executor executor;
+
+    /**
+     * A flag marked that the executor was created locally by the controller
+     * and so it should be shutdown when disposing
      */
     private final boolean createdExecutor;
 
-    /**
-     * Current filter chain builder.
-     */
     private FilterChainBuilder filterChainBuilder = new FilterChainBuilder();
 
     private final AtomicBoolean activated = new AtomicBoolean(false);
 
     private IOHandler handler = new IOHandlerAdapter();
 
-    /**
-     * A lock object which must be acquired when related resources are
-     * destroyed.
-     */
     protected final Object disposalLock = new Object();
 
     private volatile boolean disposing;
@@ -46,12 +45,17 @@ public abstract class AbstractIOController<S extends AbstractIOSession> implemen
 
     protected final DefaultIOFuture disposalFuture = new DefaultIOFuture(null);
 
-    /**
-     * The unique number identifying the Service. It's incremented
-     * for each new IoService created.
-     */
     private static final AtomicInteger id = new AtomicInteger(0);
 
+    /**
+     * Constructor for {@link AbstractIOController}.
+     * A <code>null</code> {@link Executor} provided will cause a default one created inside
+     * this controller. If you provide an {@link Executor} created by yourself, you must also
+     * manage it by yourself.
+     *
+     * @param executor
+     *            the {@link Executor} used for handling all threads. Can be <code>null</code>.
+     */
     public AbstractIOController(Executor executor) {
         if(executor == null){
             this.executor = getDefaultThreadPollExecutor();
@@ -62,6 +66,10 @@ public abstract class AbstractIOController<S extends AbstractIOSession> implemen
         }
     }
 
+    /**
+     * Get the {@link Executor}.
+     * Use this API only if you really know what you can do with it.
+     * */
     protected Executor getExecutor(){
         return executor;
     }
@@ -75,18 +83,24 @@ public abstract class AbstractIOController<S extends AbstractIOSession> implemen
     }
 
     /**
-     * @return true if the instance is active
+     * {@inheritDoc}
      */
     @Override
     public boolean isActive() {
         return activated.get();
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public void activate(){
         activated.compareAndSet(false, true);
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public void deactivate(){
         activated.compareAndSet(true, false);
@@ -124,20 +138,24 @@ public abstract class AbstractIOController<S extends AbstractIOSession> implemen
     /**
      * {@inheritDoc}
      */
+    @Override
     public final boolean isDisposing() {
         return disposing;
     }
 
-
     /**
-     * Implement this method to release any acquired resources.  This method
-     * is invoked only once by {@link #dispose()}.
+     * This method will release any resources. It is invoked only once by {@link #dispose()}.
      *
      * @throws Exception If the dispose failed
      */
     protected abstract void dispose0() throws Exception;
 
+    /**
+     * This method will create and @return a default executor.
+     * It is invoke only by the constructor.
+     * */
     protected abstract Executor getDefaultThreadPollExecutor();
+
 
     protected final void executeRunnable(Runnable runnable, String suffix) {
         String name = runnable.getClass().getSimpleName() + '-' + id.incrementAndGet();

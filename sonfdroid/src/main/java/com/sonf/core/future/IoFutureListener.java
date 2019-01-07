@@ -5,7 +5,7 @@ import java.util.EventListener;
 public interface IoFutureListener<F extends IOFuture> extends EventListener {
     /**
      * Invoked when the operation associated with the {@link IOFuture}
-     * has been completed even if you add the listener after the completion.
+     * has been completed
      *
      * @param future  The source {@link IOFuture} which called this
      *                callback.

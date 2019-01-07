@@ -32,11 +32,11 @@ import com.sonf.core.session.IOConfig;
 import com.sonf.socket.AbstractSocketConfig;
 
 /**
- * A default implementation of {@link AbstractSocketConfig}.
- *
- * @author <a href="mailto:yy_nie@hotmail.com">Yan.Nie</a>
+ * NIO TCP socket config
+ * Inheriting class of {@link AbstractSocketConfig}
  */
 public class NioSocketConfig extends AbstractSocketConfig {
+    /* Don't use SO_LINGER for NIO Socket channel */
     private static final int DEFAULT_SO_LINGER = -1;
 
     /* The SO_RCVBUF parameter. Set to -1 (ie, will default to OS default) */
@@ -71,7 +71,6 @@ public class NioSocketConfig extends AbstractSocketConfig {
         super.setAll(config);
         if(config instanceof NioSocketConfig){
             NioSocketConfig imp = (NioSocketConfig)config;
-
         }
 
     }

@@ -12,7 +12,7 @@ public class NamedRunnable implements Runnable {
     private final Runnable runnable;
 
     /**
-     * Creates a new instance of NamedRunnable.
+     * Constructor
      *
      * @param runnable The underlying runnable
      * @param newName The runnable's name
@@ -44,10 +44,6 @@ public class NamedRunnable implements Runnable {
         }
     }
 
-    /**
-     * Wraps {@link Thread#setName(String)} to catch a possible {@link Exception}s such as
-     * {@link SecurityException} in sandbox environments, such as applets
-     */
     private void setName(Thread thread, String name) {
         try {
             thread.setName(name);

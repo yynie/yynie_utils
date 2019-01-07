@@ -16,6 +16,7 @@ import com.sonf.core.future.IOFuture;
 import com.sonf.core.future.IWriteFuture;
 import com.sonf.core.write.IWritePacket;
 import com.sonf.core.write.WritePacket;
+import com.sonf.socket.AbstractSocketConfig;
 
 import java.io.IOException;
 import java.net.SocketAddress;
@@ -31,17 +32,23 @@ import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicLong;
 import java.util.concurrent.atomic.AtomicReference;
 
-
+/**
+ *  Base implementation of {@link IOSession}
+ */
 public abstract class AbstractIOSession<CH, CG extends AbstractIOConfig> implements IOSession<CH, CG> {
     /** An id generator guaranteed to generate unique IDs for the session */
     private static AtomicLong idGenerator = new AtomicLong(0L);
     /** The session ID */
     private long sessionId;
+    /** The communication channel */
     private CH channel;
+    /** The session config */
     private CG config;
+    /** The controller which will manage this session */
     private IOController controller;
     /** The NioSession processor */
     protected final IOProcessor<? extends AbstractIOSession> processor;
+
     private final Object lock = new Object();
     private IOSessionAttribute attributeMap;
     private Queue<IWritePacket> writePacketQueue;
@@ -52,6 +59,7 @@ public abstract class AbstractIOSession<CH, CG extends AbstractIOConfig> impleme
     // Status variables
     private final AtomicBoolean scheduledForFlush = new AtomicBoolean();
 
+    /** The read IoBuffer */
     private IoBuffer readIoBuffer = new SimpleIoBuffer();
 
     private long lastReadTime;
@@ -103,6 +111,11 @@ public abstract class AbstractIOSession<CH, CG extends AbstractIOConfig> impleme
 
     private AtomicReference<SState> stateRef = new AtomicReference<SState>(SState.NEW);
 
+    /**
+     * Constructor
+     * @param controller the controller provided service for this session
+     * @param processor the processor handling this session
+     */
     public AbstractIOSession(IOController controller, IOProcessor<? extends AbstractIOSession> processor){
         this.controller = controller;
         this.processor = processor;
@@ -145,9 +158,9 @@ public abstract class AbstractIOSession<CH, CG extends AbstractIOConfig> impleme
 
 
     /**
-     * update the idle time
+     * update the write idle time
      *
-     * @param curElapsedTime The current time
+     * @param curElapsedTime The current time ({@link SystemClock#elapsedRealtime()()})
      */
     public final void updateWrittenTime(long curElapsedTime) {
         lastWriteTime = curElapsedTime;
@@ -156,9 +169,9 @@ public abstract class AbstractIOSession<CH, CG extends AbstractIOConfig> impleme
     }
 
     /**
-     * update the idle time
+     * update the read idle time
      *
-     * * @param currentTime The current time
+     * * @param curElapsedTime The current time ({@link SystemClock#elapsedRealtime()()})
      */
     public final void updateReadTime(long curElapsedTime) {
         lastReadTime = curElapsedTime;
@@ -198,7 +211,7 @@ public abstract class AbstractIOSession<CH, CG extends AbstractIOConfig> impleme
      * Fires a SESSION_IDLE if applicable for the
      * specified {@code session}.
      *
-     * @param curElapsedTime the current elapsed real time (i.e. {@link SystemClock#elapsedRealtime()()})
+     * @param curElapsedTime the current elapsed real time ({@link SystemClock#elapsedRealtime()()})
      */
     public void notifyIdleSession(long curElapsedTime) {
         notifyIdleSession0(curElapsedTime, getConfig().getIdleTimeInMillis(IdleStatus.BOTH_IDLE),
@@ -240,7 +253,7 @@ public abstract class AbstractIOSession<CH, CG extends AbstractIOConfig> impleme
      * Increase the count of the various Idle counter
      *
      * @param status The current status
-     * @param curElapsedTime The current time
+     * @param curElapsedTime The current time ({@link SystemClock#elapsedRealtime()()})
      */
     public void increaseIdleCount(IdleStatus status, long curElapsedTime) {
         if (status == IdleStatus.BOTH_IDLE) {
@@ -257,8 +270,27 @@ public abstract class AbstractIOSession<CH, CG extends AbstractIOConfig> impleme
         }
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
-    public IoBuffer getIOBuffer(){
+    public int getIdleCount(IdleStatus status){
+        if (status == IdleStatus.BOTH_IDLE) {
+            return idleCountForBoth.get();
+        } else if (status == IdleStatus.READER_IDLE) {
+            return idleCountForRead.get();
+        } else if (status == IdleStatus.WRITER_IDLE) {
+            return idleCountForWrite.get();
+        } else {
+            throw new IllegalArgumentException("Unknown idle status: " + status);
+        }
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public IoBuffer getReadIOBuffer(){
         synchronized (readIoBuffer){
             if(!readIoBuffer.available()){
                 readIoBuffer.allocate(config.getReadBufferSize());
@@ -291,6 +323,9 @@ public abstract class AbstractIOSession<CH, CG extends AbstractIOConfig> impleme
         return filterChainMatcher;
     }
 
+    /**
+     * Prepare data right before adding to Polling processor
+     */
     public void prepare(){
         stateRef.set(SState.CONNECTTED);
         applySessionConfig();
@@ -310,6 +345,7 @@ public abstract class AbstractIOSession<CH, CG extends AbstractIOConfig> impleme
     /**
      * {@inheritDoc}
      */
+    @Override
     public final IWritePacket getCurrentWritePacket() {
         return currentWritePacket;
     }
@@ -317,43 +353,65 @@ public abstract class AbstractIOSession<CH, CG extends AbstractIOConfig> impleme
     /**
      * {@inheritDoc}
      */
+    @Override
     public final void setCurrentWritePacket(IWritePacket currentWritePacket) {
         this.currentWritePacket = currentWritePacket;
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public Queue<IWritePacket> getWriteQueue(){
         return writePacketQueue;
     }
 
+    /**
+     * @return the processor handling this session
+     */
     public IOProcessor getProcessor(){
         return processor;
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public void setChannel(CH channel) {
         this.channel = channel;
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public CH getChannel(){
         return this.channel;
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public void setConfig(CG config){
         this.config = config;
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public CG getConfig(){
         return config;
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public IOFuture connect(){
         _SWITCH_STATE_(SState.NEW, SState.CONNECTING);
-        IOFuture f = getConnectFuture();
+        IOFuture f = getNewConnectFuture();
         if(controller.connect(f)){
             setConnectDeadLine();
         }else{
@@ -362,39 +420,63 @@ public abstract class AbstractIOSession<CH, CG extends AbstractIOConfig> impleme
         return f;
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public void setStateClosed(){
         stateRef.set(SState.INVALID);
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public void setStateReady(){
         stateRef.set(SState.READY);
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public boolean isReady(){
         return stateRef.get().equals(SState.READY);
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public boolean isConnecting(){
         return stateRef.get().equals(SState.CONNECTING);
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public boolean isClosing(){
         return stateRef.get().equals(SState.CLOSING);
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public boolean isInvalid(){
         return stateRef.get().equals(SState.INVALID);
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public boolean isNew() { return  stateRef.get().equals(SState.NEW); }
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public void cancelConnect(IOFuture future){
         if(stateRef.get().equals(SState.CONNECTING)) {
@@ -587,7 +669,7 @@ public abstract class AbstractIOSession<CH, CG extends AbstractIOConfig> impleme
             throw new IllegalArgumentException("Trying to write a null message : not allowed");
         }
 
-        IWriteFuture future = getWriteFuture();
+        IWriteFuture future = getNewWriteFuture();
         if(!isReady()){
             future.setException(new IllegalStateException("Trying to write a message to a closed session"));
             return future;
@@ -633,23 +715,64 @@ public abstract class AbstractIOSession<CH, CG extends AbstractIOConfig> impleme
         return scheduledForFlush.get();
     }
 
+    /**
+     * Set the remote {@link SocketAddress} of the remote endpoint
+     *
+     * @param remoteAddress {@link SocketAddress}
+     */
     public abstract void setRemoteAddress(SocketAddress remoteAddress);
 
+    /**
+     * Set the host and port of the remote endpoint
+     *
+     * @param remoteHost host, may be ip address or domain
+     * @param remotePort port the remote server listened on for access
+     */
     public abstract void setRemoteAddress(String remoteHost, int remotePort);
 
+    /**
+     * @return the parsed remote {@link SocketAddress}, may be null if un-parsed or parse failed.
+     */
     public abstract SocketAddress getRemoteAddress();
 
+    /**
+     * parse the remote address into the {@link SocketAddress} object
+     *
+     * @throws UnknownHostException by underlying system call
+     */
     public abstract void parseRemoteAddress() throws UnknownHostException;
 
+    /**
+     * Calculate the connect timeout deadline based on {@link AbstractSocketConfig#getConnectTimeoutMs()}
+     */
     public abstract void setConnectDeadLine();
 
+    /**
+     * @return whether the current connect operation is overtime
+     */
     public abstract boolean isConnectTimeout();
 
-    protected abstract IConnectFuture getConnectFuture();
+    /**
+     * create and return a new {@link IConnectFuture} implementation
+     *
+     * @return {@link IConnectFuture} implementation
+     */
+    protected abstract IConnectFuture getNewConnectFuture();
 
+    /**
+     * @return the {@link ICloseFuture} implementation
+     */
     public abstract ICloseFuture getCloseFuture();
 
-    protected abstract IWriteFuture getWriteFuture();
+    /**
+     * create and return a new {@link IWriteFuture} implementation
+     *
+     * @return {@link IWriteFuture} implementation
+     */
+    protected abstract IWriteFuture getNewWriteFuture();
 
+    /**
+     * Build Session config and apply it to socket channel
+     */
     protected abstract void applySessionConfig();
 }

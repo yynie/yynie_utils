@@ -3,6 +3,23 @@ package com.sonf.core.session;
 
 import java.io.Serializable;
 
+/**
+ * AttributeKey will be built from class name and specified key name.
+ * It will be used as a map key to store data into a session's attribute map.
+ *
+ * For example:<br>
+ *   <pre>
+ *       //create a key from DefaultFilterChain
+ *       AttributeKey key = new AttributeKey(DefaultFilterChain.class, "connectFuture");
+ *
+ *       //store
+ *       String save = "store something in session";
+ *       session.setAttribute(key, save);
+ *
+ *       //get and remove the stored data
+ *       Object got = session.removeAttribute(key)
+ *   </pre>
+ */
 public final class AttributeKey implements Serializable {
     private final String name;
 

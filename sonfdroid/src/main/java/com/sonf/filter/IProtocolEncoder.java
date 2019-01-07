@@ -4,10 +4,8 @@ import com.sonf.core.session.IOSession;
 
 public interface IProtocolEncoder {
     /**
-     * Encodes higher-level message objects into binary or protocol-specific data.
-     * MINA invokes {@link #encode(IOSession, Object, IProtocolOutput)}
-     * method with message which is popped from the session write queue, and then
-     * the encoder implementation puts encoded messages into {@link IProtocolOutput}.
+     * Encode higher-level message into binary or protocol-specific data.
+     * Invoked before a message fired to write to the remote endpoint
      *
      * @param session The current Session
      * @param message the message to encode

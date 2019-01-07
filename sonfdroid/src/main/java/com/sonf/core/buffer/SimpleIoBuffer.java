@@ -8,10 +8,17 @@ import java.nio.charset.CharsetDecoder;
 import java.nio.charset.CharsetEncoder;
 import java.nio.charset.CoderResult;
 
+/**
+ * Simple Inheriting class of {@link IoBuffer}
+ */
 public class SimpleIoBuffer extends IoBuffer{
     private ByteBuffer nioBuffer;
 
-    protected ByteBuffer allocateNioBuffer(int capacity, boolean direct) {
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    protected ByteBuffer allocateByteBuffer(int capacity, boolean direct) {
         ByteBuffer nioBuffer;
         if (direct) {
             nioBuffer = ByteBuffer.allocateDirect(capacity);
@@ -22,12 +29,19 @@ public class SimpleIoBuffer extends IoBuffer{
         return nioBuffer;
     }
 
-    protected IoBuffer wrap(ByteBuffer buf){
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    protected void wrap(ByteBuffer buf){
         nioBuffer = buf;
         nioBuffer.order(ByteOrder.BIG_ENDIAN);
-        return this;
     }
 
+    /**
+     * {@inheritDoc}
+     */
+    @Override
     public ByteBuffer buf(){
         return nioBuffer;
     }

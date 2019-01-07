@@ -17,16 +17,20 @@ import java.util.Iterator;
 import java.util.Set;
 import java.util.concurrent.Executor;
 
+/**
+ * NIO TCP socket Channel Processor
+ * Inheriting class of {@link AbstractPollingIoProcessor}.
+ */
 public class NioProcessor extends AbstractPollingIoProcessor<NioSession> {
     private final Logger log = Logger.get(NioProcessor.class, Logger.Level.INFO);
     /** The selector associated with this processor */
     private Selector selector;
 
     /**
+     * Constructor
      *
-     * Creates a new instance of NioProcessor.
-     *
-     * @param executor The executor to use
+     * @param executor The executor to use.
+     *                 It should be the same one with {@limk IOController}
      */
     public NioProcessor(Executor executor) {
         super(executor);
@@ -40,9 +44,7 @@ public class NioProcessor extends AbstractPollingIoProcessor<NioSession> {
     }
 
     /**
-     * In the case we are using the java select() method, this method is used to
-     * trash the buggy selector and create a new one, registering all the
-     * sockets on it.
+     * {@inheritDoc}
      */
     @Override
     protected void registerNewSelector() throws IOException {
@@ -158,6 +160,9 @@ public class NioProcessor extends AbstractPollingIoProcessor<NioSession> {
         return selector.select(timeout);
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
     protected boolean isSelectorEmpty() {
         return selector.keys().isEmpty();
@@ -172,14 +177,20 @@ public class NioProcessor extends AbstractPollingIoProcessor<NioSession> {
         selector.wakeup();
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
     protected Iterator<NioSession> allSessions() {
-        return new IoSessionIterator(selector.keys());
+        return new IOSessionIterator(selector.keys());
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
     protected Iterator<NioSession> selectedSessions() {
-        return new IoSessionIterator(selector.selectedKeys());
+        return new IOSessionIterator(selector.selectedKeys());
     }
 
     /**
@@ -204,6 +215,9 @@ public class NioProcessor extends AbstractPollingIoProcessor<NioSession> {
         key.interestOps(newInterestOps);
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
     protected int read(NioSession session, IoBuffer buf) throws Exception {
         ByteChannel channel = session.getChannel();
@@ -211,6 +225,9 @@ public class NioProcessor extends AbstractPollingIoProcessor<NioSession> {
         return channel.read(buf.buf());
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
     protected int write(NioSession session, IoBuffer buf, int length) throws IOException {
         if (buf.remaining() <= length) {
@@ -226,6 +243,9 @@ public class NioProcessor extends AbstractPollingIoProcessor<NioSession> {
         }
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
     protected boolean isReadable(NioSession session) {
         SelectionKey key = session.getSelectionKey();
@@ -233,6 +253,9 @@ public class NioProcessor extends AbstractPollingIoProcessor<NioSession> {
         return (key != null) && key.isValid() && key.isReadable();
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
     protected void doDispose() throws Exception {
         selector.close();
@@ -240,6 +263,9 @@ public class NioProcessor extends AbstractPollingIoProcessor<NioSession> {
         log.i("doDispose: selector closed");
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
     protected boolean isWritable(NioSession session) {
         SelectionKey key = session.getSelectionKey();
@@ -247,20 +273,15 @@ public class NioProcessor extends AbstractPollingIoProcessor<NioSession> {
         return (key != null) && key.isValid() && key.isWritable();
     }
 
-    /**
-     * An encapsulating iterator around the {@link Selector#selectedKeys()} or
-     * the {@link Selector#keys()} iterator;
-     */
-    protected static class IoSessionIterator<NioSession> implements Iterator<NioSession> {
+    protected static class IOSessionIterator<NioSession> implements Iterator<NioSession> {
         private final Iterator<SelectionKey> iterator;
 
         /**
          * Create this iterator as a wrapper on top of the selectionKey Set.
          *
-         * @param keys
-         *            The set of selected sessions
+         * @param keys The set of selected sessions
          */
-        private IoSessionIterator(Set<SelectionKey> keys) {
+        private IOSessionIterator(Set<SelectionKey> keys) {
             iterator = keys.iterator();
         }
 

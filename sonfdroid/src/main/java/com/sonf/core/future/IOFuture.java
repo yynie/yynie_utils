@@ -5,47 +5,39 @@ import com.sonf.core.session.IOSession;
 import java.util.concurrent.TimeUnit;
 
 public interface IOFuture {
+
     /**
      * @return the {@link IOSession} which is associated with this future.
      */
     IOSession getSession();
+
     /**
-     * Sets the exception caught due to connection failure and notifies all
-     * threads waiting for this future.  This method is invoked by MINA
-     * internally.  Please do not call this method directly.
+     * Sets the exception as result
      *
-     * @param exception The exception to store in the ConnectFuture instance
+     * @param exception
      */
     void setException(Throwable exception);
 
     /**
-     * Returns the cause of the connection failure.
-     *
-     * @return <tt>null</tt> if the connect operation is not finished yet,
-     *         or if the connection attempt is successful, otherwise returns
-     *         teh cause of the exception
+     * @return <tt>null</tt> if the operation is not finished
+     *         or if the operation is successful, otherwise return the exception
      */
     Throwable getException();
 
     /**
-     * @return <tt>true</tt> if the operation is completed.
+     * @return <tt>true</tt> if the operation is completed whether or not successfully.
      */
     boolean isDone();
 
     /**
      * Wait for the asynchronous operation to complete uninterruptibly.
-     * The attached listeners will be notified when the operation is
-     * completed.
-     *
-     * @return the current IoFuture
      */
     void awaitUninterruptibly();
 
 
     /**
      * Wait for the asynchronous operation to complete.
-     * The attached listeners will be notified when the operation is
-     * completed.
+     * Return when the operation is completed or interrupted.
      *
      * @exception InterruptedException If the thread is interrupted while waiting
      */
@@ -54,8 +46,8 @@ public interface IOFuture {
     /**
      * Wait for the asynchronous operation to complete with the specified timeout.
      *
-     * @param timeout The maximum delay to wait before getting out
-     * @param unit the type of unit for the delay (seconds, minutes...)
+     * @param timeout The maximum delay to wait
+     * @param unit the type of unit for the delay
      * @return <tt>true</tt> if the operation is completed.
      * @exception InterruptedException If the thread is interrupted while waiting
      */
@@ -64,27 +56,23 @@ public interface IOFuture {
     /**
      * Wait for the asynchronous operation to complete with the specified timeout.
      *
-     * @param timeoutMillis The maximum milliseconds to wait before getting out
+     * @param timeoutMillis The maximum milliseconds to wait
      * @return <tt>true</tt> if the operation is completed.
      * @exception InterruptedException If the thread is interrupted while waiting
      */
     boolean await(long timeoutMillis) throws InterruptedException;
 
     /**
-     * Adds an event <tt>listener</tt> which is notified when
+     * Set a <tt>listener</tt> which is notified when
      * this future is completed. If the listener is added
      * after the completion, the listener is directly notified.
      *
-     * @param listener The listener to add
-     * @return the current IoFuture
+     * @param listener The listener to set
      */
     void setListener(IoFutureListener listener);
 
     /**
-     * Removes an existing event <tt>listener</tt> so it won't be notified when
-     * the future is completed.
-     *
-     * @return the current IoFuture
+     * Removes an existing <tt>listener</tt>
      */
     void removeListener();
 }

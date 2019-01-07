@@ -5,8 +5,14 @@ import com.sonf.core.session.IOConfig;
 
 import java.net.Socket;
 
+/**
+ * TCP Socket configuration
+ * Inheriting class of {@link AbstractIOConfig}
+ */
 public abstract class AbstractSocketConfig extends AbstractIOConfig {
+    /* connect time out used for all sessions connect operation */
     private long connectTimeoutMs = 60 * 1000L;
+
     /**
      * {@inheritDoc}
      */
@@ -20,10 +26,21 @@ public abstract class AbstractSocketConfig extends AbstractIOConfig {
         }
     }
 
+    /**
+     * Get the connect timeout milliseconds which will be used
+     * for all sessions' connect operation
+     *
+     * @return connect timeout milliseconds
+     */
     public long getConnectTimeoutMs(){
         return connectTimeoutMs;
     }
 
+    /**
+     * Set the connect timeout milliseconds,
+     *
+     * @param connectTimeoutMs
+     */
     public void setConnectTimeoutMs(long connectTimeoutMs) {
         this.connectTimeoutMs = connectTimeoutMs;
     }
@@ -33,7 +50,6 @@ public abstract class AbstractSocketConfig extends AbstractIOConfig {
      * in platform-dependent behavior and unexpected blocking of I/O thread.
      *
      * @see Socket#getSoLinger()
-     * @see <a href="http://bugs.sun.com/bugdatabase/view_bug.do?bug_id=6179351">Sun Bug Database</a>
      *
      * @return The value for <tt>SO_LINGER</tt>
      */
@@ -46,7 +62,6 @@ public abstract class AbstractSocketConfig extends AbstractIOConfig {
      * @param soLinger Please specify a negative value to disable <tt>SO_LINGER</tt>.
      *
      * @see Socket#setSoLinger(boolean, int)
-     * @see <a href="http://bugs.sun.com/bugdatabase/view_bug.do?bug_id=6179351">Sun Bug Database</a>
      */
     public abstract void setSoLinger(int soLinger);
 }

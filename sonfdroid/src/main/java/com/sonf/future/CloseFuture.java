@@ -4,7 +4,16 @@ import com.sonf.core.future.DefaultIOFuture;
 import com.sonf.core.future.ICloseFuture;
 import com.sonf.core.session.IOSession;
 
+/**
+ * Inheriting class of {@link DefaultIOFuture} used for an async close request
+ */
 public class CloseFuture extends DefaultIOFuture implements ICloseFuture {
+
+    /**
+     * Constructor
+     *
+     * @param session the associated session
+     */
     public CloseFuture(IOSession session) {
         super(session);
     }
@@ -12,6 +21,7 @@ public class CloseFuture extends DefaultIOFuture implements ICloseFuture {
     /**
      * {@inheritDoc}
      */
+    @Override
     public boolean isClosed() {
         if (isDone()) {
             return ((Boolean) getValue()).booleanValue();
@@ -23,6 +33,7 @@ public class CloseFuture extends DefaultIOFuture implements ICloseFuture {
     /**
      * {@inheritDoc}
      */
+    @Override
     public void setClosed() {
         setValue(Boolean.TRUE);
     }

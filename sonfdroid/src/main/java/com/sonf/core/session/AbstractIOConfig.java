@@ -5,6 +5,9 @@ import com.sonf.core.RuntimeIoException;
 import java.lang.reflect.Constructor;
 import java.net.Socket;
 
+/**
+ * Base implementation of {@link IOConfig}
+ */
 public abstract class AbstractIOConfig implements IOConfig {
     /** The default size of the buffer used to read incoming data */
     private int readBufferSize = 2048;
@@ -26,6 +29,7 @@ public abstract class AbstractIOConfig implements IOConfig {
      * Default to infinite
      **/
     private long idleTimeForBothMillis;
+
     /** The delay to wait for a write operation to complete before bailing out */
     private long writeTimeoutInMillis = 60 * 1000L;
 
@@ -48,11 +52,17 @@ public abstract class AbstractIOConfig implements IOConfig {
         this.readBufferSize = readBufferSize;
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public int getMaxWriteBytes() {
         return maxWriteBytes;
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public void setMaxWriteBytes(int maxWriteBytes) {
         this.maxWriteBytes = maxWriteBytes;
@@ -106,6 +116,11 @@ public abstract class AbstractIOConfig implements IOConfig {
         }
     }
 
+    /**
+     * clone a new instance, all properties set to same value of this one
+     *
+     * @return a new AbstractIOConfig instance
+     */
     public AbstractIOConfig clone(){
         Class<? extends AbstractIOConfig> type = this.getClass();
         Constructor<? extends AbstractIOConfig> constructor = null;

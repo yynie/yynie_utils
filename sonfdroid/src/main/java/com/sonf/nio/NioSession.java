@@ -25,6 +25,10 @@ import java.net.UnknownHostException;
 import java.nio.channels.SelectionKey;
 import java.nio.channels.SocketChannel;
 
+/**
+ * NIO TCP socket Channel session
+ * Inheriting the class of {@link AbstractIOSession}
+ */
 public class NioSession extends AbstractIOSession<SocketChannel, NioSocketConfig> {
     private Logger log = Logger.get(NioSession.class, Logger.Level.INFO);
     private InetSocketAddress remoteAddress;
@@ -38,25 +42,43 @@ public class NioSession extends AbstractIOSession<SocketChannel, NioSocketConfig
      */
     private final CloseFuture closeFuture = new CloseFuture(this);
 
+    /**
+     * Constructor of a NIO TCP socket Channel session
+     *
+     * @param controller controller provided service for this session
+     * @param processor processor handling the I/O operations of this session
+     */
     public NioSession(IOController controller, IOProcessor<NioSession> processor) {
         super(controller, processor);
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
-    protected IConnectFuture getConnectFuture(){
+    protected IConnectFuture getNewConnectFuture(){
         return new ConnectFuture(this);
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public ICloseFuture getCloseFuture(){
         return closeFuture;
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
-    protected IWriteFuture getWriteFuture(){
+    protected IWriteFuture getNewWriteFuture(){
         return new WriteFuture(this);
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
     protected void applySessionConfig() {
         NioSocketConfig config = new NioSessionConfigImpl();
@@ -64,6 +86,9 @@ public class NioSession extends AbstractIOSession<SocketChannel, NioSocketConfig
         setConfig(config);
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public void setRemoteAddress(SocketAddress remoteAddress) {
         if(!isNew()){
@@ -76,6 +101,9 @@ public class NioSession extends AbstractIOSession<SocketChannel, NioSocketConfig
         }
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public void setRemoteAddress(String remoteHost, int remotePort) {
         if(!isNew()){
@@ -86,6 +114,9 @@ public class NioSession extends AbstractIOSession<SocketChannel, NioSocketConfig
         this.port = remotePort;
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public void parseRemoteAddress() throws UnknownHostException {
         if(remoteAddress != null) return;
@@ -100,6 +131,9 @@ public class NioSession extends AbstractIOSession<SocketChannel, NioSocketConfig
         }
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public final SocketAddress getRemoteAddress(){
         return remoteAddress;
@@ -109,17 +143,29 @@ public class NioSession extends AbstractIOSession<SocketChannel, NioSocketConfig
         return getChannel().socket();
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public String getUniqueKey(){
-        InetAddress inetAddress = remoteAddress.getAddress();
-        return inetAddress.getHostAddress() + ":" + remoteAddress.getPort();
+        if(remoteAddress != null) {
+            InetAddress inetAddress = remoteAddress.getAddress();
+            return inetAddress.getHostAddress() + ":" + remoteAddress.getPort();
+        }
+        return null;
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public void setConnectDeadLine(){
         connectDeadLine = SystemClock.elapsedRealtime() + getConfig().getConnectTimeoutMs();
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public boolean isConnectTimeout(){
         if(connectDeadLine == UN_SET){
@@ -152,6 +198,11 @@ public class NioSession extends AbstractIOSession<SocketChannel, NioSocketConfig
         return this.selectionKey.isValid();
     }
 
+    /**
+     * A private class create as a copy of the controller's configuration when the session
+     * is prepared to add into polling
+     * That allows the session to have its own configuration setting
+     */
     private class NioSessionConfigImpl extends NioSocketConfig{
         /**
          * {@inheritDoc}

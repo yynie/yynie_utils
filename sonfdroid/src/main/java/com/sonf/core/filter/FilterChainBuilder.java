@@ -16,24 +16,41 @@ public class FilterChainBuilder {
         entries = new CopyOnWriteArrayList<Entry>();
     }
 
+    /**
+     * Build a session's filter chain, add filters into chain one by one
+     * @param matcher IFilterChainMatcher used for choice filter for session
+     * @param chain session's filter chain
+     */
     public void buildChain(IFilterChainMatcher matcher, IFilterChain chain){
         for (Entry e : entries) {
             if((matcher == null)
-                || (matcher.isMatched(e.getName()))){
+                || (matcher.isMatched(chain.getSession(), e.getName()))){
                 chain.addLast(e.getName(), e.getFilter());
             }
         }
     }
 
+    /**
+     * Adds the specified filter with the specified name at the end of entries.
+     *
+     * @param name The filter's name
+     * @param filter The filter to add
+     */
     public synchronized void add(String name, IFilter filter) {
         register(entries.size(), new EntryImpl(name, filter));
     }
 
+    /**
+     * @param name The filter name
+     *
+     * @return <tt>true</tt> if this chain contains the specified <tt>filter</tt>.
+     */
     public boolean contains(String name) {
         return getEntry(name) != null;
     }
 
-    public Entry getEntry(String name) {
+
+    private Entry getEntry(String name) {
         for (Entry e : entries) {
             if (e.getName().equals(name)) {
                 return e;
@@ -51,6 +68,9 @@ public class FilterChainBuilder {
         entries.add(index, e);
     }
 
+    /**
+     * clear the filters in this builder
+     */
     public synchronized void clear() {
         entries.clear();
     }

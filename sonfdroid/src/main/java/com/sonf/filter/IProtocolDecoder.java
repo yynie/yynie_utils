@@ -4,11 +4,10 @@ import com.sonf.core.buffer.IoBuffer;
 import com.sonf.core.session.IOSession;
 
 public interface IProtocolDecoder {
+
     /**
      * Decodes binary or protocol-specific content into higher-level message objects.
-     * MINA invokes {@link #decode(IOSession, IoBuffer, IProtocolOutput)}
-     * method with read data, and then the decoder implementation puts decoded
-     * messages into {@link IProtocolOutput}.
+     * Invoked when read data from session channel
      *
      * @param session The current Session
      * @param in the buffer to decode

@@ -6,6 +6,22 @@ import com.sonf.core.filter.IFilterChain.Entry;
 import com.sonf.core.session.IdleStatus;
 import com.sonf.core.write.IWritePacket;
 
+/**
+ * A filter which intercepts {@link IOHandler} events to do something like transforming message
+ *  or performing measurement , etc.
+ *  A filter instance should be register to the controller's {@link FilterChainBuilder},
+ *  and it will be added to session's {@link IFilterChain}, so event on this session will pass by the
+ *  filters on the chain one by one.
+ *
+ *  Note that
+ *      the event which is fired from the controller to outside will pass the chain
+ *      from Head to Tail and finally to the IOHandler.
+ *  On the contrary
+ *      the event fired from outside to the controller will pass the chain
+ *      form Tail o Head.
+ *  This is important if you use the filter chain to do message encode/decode or wrap/unwrap.
+ *  Don't make a wrong order when adding your filters into the chain.
+ */
 public interface IFilter {
 
     /**

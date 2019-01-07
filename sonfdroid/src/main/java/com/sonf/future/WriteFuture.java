@@ -4,7 +4,16 @@ import com.sonf.core.future.DefaultIOFuture;
 import com.sonf.core.future.IWriteFuture;
 import com.sonf.core.session.IOSession;
 
+/**
+ * Inheriting class of {@link DefaultIOFuture} used for an async write request
+ */
 public class WriteFuture extends DefaultIOFuture implements IWriteFuture {
+
+    /**
+     * Constructor
+     *
+     * @param session the associated session
+     */
     public WriteFuture(IOSession session) {
         super(session);
     }

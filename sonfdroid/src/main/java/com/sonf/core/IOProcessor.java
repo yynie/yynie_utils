@@ -12,44 +12,37 @@ public interface IOProcessor<S extends IOSession> {
     boolean isDisposing();
 
     /**
-     * @return <tt>true</tt> if and if only all resources of this processor
-     * have been disposed.
+     * @return <tt>true</tt> if all resources of this processor have been disposed.
      */
     boolean isDisposed();
 
     /**
-     * Releases any resources allocated by this processor.  Please note that
-     * the resources might not be released as long as there are any sessions
-     * managed by this processor.  Most implementations will close all sessions
-     * immediately and release the related resources.
+     * Releases all resources allocated by this processor.  Please note that
+     * this method might be blocked as long as there are any sessions
+     * managed by this processor.
      */
     void dispose();
 
 
     /**
-     * Adds the specified {@code session} to the I/O processor so that
-     * the I/O processor starts to perform any I/O operations related
-     * with the {@code session}.
+     * Adds a session to the processor to perform I/O operations with this session
      *
-     * @param session The added session
+     * @param session The session to be added
      */
     void add(S session);
 
     /**
-     * Removes and closes the specified {@code session} from the I/O
-     * processor so that the I/O processor closes the connection
-     * associated with the {@code session} and releases any other related
-     * resources.
+     * Remove the specified session from the processor so that the processor will closes
+     * the connection with this seesion and releases all related resources.
      *
      * @param session The session to be removed
      */
     void remove(S session);
 
     /**
-     * Flushes the internal write request queue of the specified
-     * {@code session}.
+     * Flushe the internal write queue of the specified session
      *
-     * @param session The session we want the message to be written
+     * @param session The session that has at lease one message to be send to the remote endpoint
      */
     void flush(S session);
 }

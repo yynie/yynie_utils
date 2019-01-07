@@ -12,16 +12,13 @@ public interface IOConfig {
     void setAll(IOConfig config);
 
     /**
-     * @return the size of the read buffer that I/O processor allocates
-     * per each read.  It's unusual to adjust this property because
-     * it's often adjusted automatically by the I/O processor.
+     * @return the size of the read buffer that I/O processor used for session's read operation.
+     *          The default size is 2048 bytes
      */
     int getReadBufferSize();
 
     /**
-     * Sets the size of the read buffer that I/O processor allocates
-     * per each read.  It's unusual to adjust this property because
-     * it's often adjusted automatically by the I/O processor.
+     * Sets the size of the read buffer that I/O processor used for session's read operation
      *
      * @param readBufferSize The size of the read buffer
      */
@@ -29,11 +26,13 @@ public interface IOConfig {
 
     /**
      * @return limitation for the number of written bytes per flush
+     *          the default value is calculated automatically based on the default readBufferSize
+     *          for read-write fairness
      */
     int getMaxWriteBytes();
 
     /**
-     * Set limitation for the number of written bytes for read-write airness
+     * Set limitation for the number of written bytes for read-write fairness
      * @param maxWriteBytes The maximum write bytes
      */
     void setMaxWriteBytes(int maxWriteBytes);
@@ -60,7 +59,7 @@ public interface IOConfig {
     long getWriteTimeoutInMillis();
 
     /**
-     * Sets write timeout in seconds.
+     * Sets write timeout in milliseconds.
      *
      * @param writeTimeoutInMillis The timeout to set
      */

@@ -7,9 +7,7 @@ public interface ICloseFuture extends IOFuture {
     boolean isClosed();
 
     /**
-     * Marks this future as closed and notifies all threads waiting for this
-     * future. This method is invoked by MINA internally.  Please do not call
-     * this method directly.
+     * Mark this future was finished and the close request has been perfectly done.
      */
     void setClosed();
 }

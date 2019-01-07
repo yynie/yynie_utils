@@ -3,12 +3,14 @@ package com.sonf.core.session;
 import com.sonf.core.IOController;
 import com.sonf.core.IOProcessor;
 import com.sonf.core.buffer.IoBuffer;
+import com.sonf.core.filter.IFilter;
 import com.sonf.core.filter.IFilterChain;
 import com.sonf.core.filter.IFilterChainMatcher;
 import com.sonf.core.future.ICloseFuture;
 import com.sonf.core.future.IOFuture;
 import com.sonf.core.future.IWriteFuture;
 import com.sonf.core.write.IWritePacket;
+import com.sonf.future.ConnectFuture;
 
 import java.util.Queue;
 import java.util.Set;
@@ -20,24 +22,107 @@ public interface IOSession<CH, CG extends IOConfig> {
      * ID which is different from each other.
      */
     long getId();
+
+    /**
+     * Set the channel associated with this session
+     *
+     * @param channel
+     */
     void setChannel(CH channel);
+
+    /**
+     * Get the channel associated with this session
+     *
+     * @return  channel
+     */
     CH getChannel();
+
+
+    /**
+     * Set the configuration of this session.
+     * @param  config  the {@link IOConfig}
+     */
     void setConfig(CG config);
+
+    /**
+     * Get the configuration of this session.
+     * Session's configuration will be applied only to this session itself.
+     *
+     * @return the {@link IOConfig} of this session.
+     */
     CG getConfig();
+
+    /**
+     * Start a Connect-request to connect this session to it's remote address
+     * This method should be called only when the session is in SState.NEW state.
+     *
+     * @return the {@link ConnectFuture} of the Connect-request
+     */
     IOFuture connect();
-    /** {@hide} */
+
+    /**
+     * Cancel the Connect-request associate with the specified {@link ConnectFuture} if
+     * the session is in SState.CONNECTING state.
+     *
+     * @param future {@link ConnectFuture} of the Connect-request to be canceled
+     */
     void cancelConnect(IOFuture future);
+
+    /**
+     * Unique key is of form:  ip:port
+     *
+     * @return  "ip:port " string
+     *          or <tt>null</tt> if the remoteAddress has not been parsed successfully
+     */
     String getUniqueKey();
 
+    /**
+     * Set the session to SState.INVALID means the session channel closed
+     */
     void setStateClosed();
+
+    /**
+     * Set the session to SState.READY means the session channel connected ok
+     * and is ready for I/O operations.
+     */
     void setStateReady();
+
+    /**
+     * @return whether this session is ready for I/O operations.
+     */
     boolean isReady();
+
+    /**
+     * @return whether this session is in connecting now
+     */
     boolean isConnecting();
+
+    /**
+     * @return whether this session is in closing now
+     */
     boolean isClosing();
+
+    /**
+     * @return whether this session is closed already
+     */
     boolean isInvalid();
+
+    /**
+     * @return whether this session is a new one,
+     *          you can use @link IOFuture connect()} method to start a connect-request
+     */
     boolean isNew();
 
-    IoBuffer getIOBuffer();
+    /**
+     * @param status {@link IdleStatus}
+     * @return the count of the specified {@link IdleStatus} counter
+     */
+    int getIdleCount(IdleStatus status);
+
+    /**
+     * @return the IoBuffer used to read data from the session channel
+     */
+    IoBuffer getReadIOBuffer();
 
     /**
      * @return the {@link IOController} which provides I/O service to this session.
@@ -78,15 +163,7 @@ public interface IOSession<CH, CG extends IOConfig> {
 
     /**
      * Sets a user defined attribute if the attribute with the specified key
-     * is not set yet.  This method is same with the following code except
-     * that the operation is performed atomically.
-     * <pre>
-     * if (containsAttribute(key)) {
-     *     return getAttribute(key);
-     * } else {
-     *     return setAttribute(key, value);
-     * }
-     * </pre>
+     * is not set yet.
      *
      * @param key The key of the attribute we want to set
      * @param value The value we want to set
@@ -123,7 +200,7 @@ public interface IOSession<CH, CG extends IOConfig> {
     ICloseFuture closeNow();
 
     /**
-     * Closes this session after all queued write requests are flushed.  This operation
+     * Closes this session after all queued write packets are flushed.  This operation
      * is asynchronous.  Wait for the returned {@link ICloseFuture} if you want to wait
      * for the session actually closed.
      *
@@ -132,23 +209,22 @@ public interface IOSession<CH, CG extends IOConfig> {
     ICloseFuture closeOnFlush();
 
     /**
-     * Writes the specified <code>message</code> to remote peer.  This
+     * Writes the specified <code>message</code> to remote endpoint.  This
      * operation is asynchronous; {@link IOHandler#messageSent(IOSession,Object)}
-     * will be invoked when the message is actually sent to remote peer.
+     * will be invoked when the message is actually sent.
      * You can also wait for the returned {@link IWriteFuture} if you want
      * to wait for the message actually written.
      *
-     * @param message The message to write
+     * @param message The message to write.
+     *                Note that the message of IoBuffer class will be considered as a raw data
+     *                and sent directly, all {@link IFilter} encoders on the session's FilterChain
+     *                will be ignored.
      * @return The associated WriteFuture
      */
     IWriteFuture write(Object message);
 
     /**
      * Get the queue that contains the message waiting for being written.
-     * As the reader might not be ready, it's frequent that the messages
-     * aren't written completely, or that some older messages are waiting
-     * to be written when a new message arrives. This queue is used to manage
-     * the backlog of messages.
      *
      * @return The queue containing the pending messages.
      */

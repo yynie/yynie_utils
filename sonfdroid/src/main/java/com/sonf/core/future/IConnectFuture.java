@@ -2,17 +2,16 @@ package com.sonf.core.future;
 
 public interface IConnectFuture extends IOFuture {
     /**
-     * Cancels the connection attempt and notifies all threads waiting for
-     * this future.
+     * Try to cancel the connect request
      *
      * @return {@code true} if the future has been cancelled by this call, {@code false}
-     * if the future was already cancelled.
+     * if the future was already cancelled or already done.
      */
     boolean cancel();
 
     /**
-     * Sets the newly connected session and notifies all threads waiting for
-     * this future.  This method is invoked internally.  Please do not
+     * Sets the connect operation to be successfully done.
+     * This method is invoked internally.  Please do not
      * call this method directly.
      */
     void setConnected();

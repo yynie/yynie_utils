@@ -44,82 +44,67 @@ public interface IFilterChain {
          */
         IFilter getFilter();
 
+        /**
+         * @return the next Entry
+         */
         Entry getNextEntry();
 
+        /**
+         * @return the previous Entry
+         */
         Entry getPrevEntry();
     }
 
     /**
-     * Fires a {@link IOHandler#sessionOpened(IOSession)} event. Most users don't need to call
-     * this method at all. Please use this method only when you implement a new transport or
-     * fire a virtual event.
+     * Fire a {@link IOHandler#sessionOpened(IOSession)} event.
      */
     void fireSessionOpened();
 
     /**
-     * Fires a {@link IOHandler#sessionClosed(IOSession)} event. Most users don't need to call
-     * this method at all. Please use this method only when you implement a new transport or
-     * fire a virtual event.
+     * Fire a {@link IOHandler#sessionClosed(IOSession)} event.
      */
     void fireSessionClosed();
 
     /**
-     * Fires a {@link IOHandler#exceptionCaught(IOSession, Throwable)} event. Most users don't
-     * need to call this method at all. Please use this method only when you implement a new
-     * transport or fire a virtual event.
+     * Fire a {@link IOHandler#exceptionCaught(IOSession, Throwable)} event.
      *
      * @param cause The exception cause
      */
     void fireExceptionCaught(Throwable cause);
 
     /**
-     * Fires a {@link IOHandler#messageSent(IOSession, Object)} event. Most
-     * users don't need to call this method at all. Please use this method only
-     * when you implement a new transport or fire a virtual event.
+     * Fire a {@link IOHandler#messageSent(IOSession, Object)} event.
      *
-     * @param packet
-     *            The sent request
+     * @param packet The sent packet
      */
     void fireMessageSent(IWritePacket packet);
 
     /**
-     * Fires a {@link IOHandler#inputClosed(IOSession)} event. Most users don't
-     * need to call this method at all. Please use this method only when you
-     * implement a new transport or fire a virtual event.
+     * Fire a {@link IOHandler#inputClosed(IOSession)} event.
      */
     void fireInputClosed();
 
     /**
-     * Fires a {@link IOHandler#messageReceived(IOSession, Object)} event. Most
-     * users don't need to call this method at all. Please use this method only
-     * when you implement a new transport or fire a virtual event.
+     * Fire a {@link IOHandler#messageReceived(IOSession, Object)} event.
      *
-     * @param message
-     *            The received message
+     * @param message The received message
      */
     void fireMessageReceived(Object message);
 
     /**
-     * Fires a {@link IOSession#closeNow()} or a {@link IOSession#closeOnFlush()} event. Most users don't need to call this method at
-     * all. Please use this method only when you implement a new transport or fire a virtual
-     * event.
+     * Fire a {@link IOSession#closeNow()} or a {@link IOSession#closeOnFlush()} event.
      */
     void fireFilterClose();
 
     /**
-     * Fires a {@link IOSession#write(Object)} event. Most users don't need to
-     * call this method at all. Please use this method only when you implement a
-     * new transport or fire a virtual event.
+     * Fire a {@link IOSession#write(Object)} event.
      *
-     * @param writePacket
-     *            The message to write
+     * @param writePacket The message to write
      */
     void fireFilterWrite(IWritePacket writePacket);
 
     /**
-     * Fires a {@link IOHandler#sessionIdle(IOSession, IdleStatus)} event. Most users don't
-     * need to call this method at all. Please use this method only when you implement a new
-     * transport or fire a virtual event.
+     * Fire a {@link IOHandler#sessionIdle(IOSession, IdleStatus)} event.
      *
      * @param status The current status to propagate
      */

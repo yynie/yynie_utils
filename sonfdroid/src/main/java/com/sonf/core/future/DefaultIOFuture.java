@@ -6,8 +6,10 @@ import com.sonf.core.session.IOSession;
 
 import java.util.concurrent.TimeUnit;
 
+/**
+ * A Default implementation of {@link IOFuture}
+ */
 public class DefaultIOFuture implements IOFuture {
-    /** A number of milliseconds to wait between two deadlock controls ( 5 seconds ) */
     private static final long DEAD_LOCK_CHECK_INTERVAL = 5000L;
     /** A lock used by the wait() method */
     private final Object lock;
@@ -20,10 +22,12 @@ public class DefaultIOFuture implements IOFuture {
 
     private Object result;
 
-    /** The first listener. This is easier to have this variable
-     * when we most of the time have one single listener */
     private IoFutureListener<DefaultIOFuture> listener;
 
+    /**
+     * Constructor
+     * @param session session associated with thi future
+     */
     public DefaultIOFuture(IOSession session) {
         assert (session != null);
         this.session = session;
@@ -33,6 +37,7 @@ public class DefaultIOFuture implements IOFuture {
     /**
      * {@inheritDoc}
      */
+    @Override
     public IOSession getSession() {
         return session;
     }
@@ -52,6 +57,7 @@ public class DefaultIOFuture implements IOFuture {
     /**
      * {@inheritDoc}
      */
+    @Override
     public Throwable getException() {
         Object v = getValue();
 
@@ -62,6 +68,13 @@ public class DefaultIOFuture implements IOFuture {
         }
     }
 
+    /**
+     * Set the result value and set this future to be done (ready = true).
+     * The notify all waiters and listener
+     *
+     * @param newValue
+     * @return false if the future is already done
+     */
     public boolean setValue(Object newValue) {
         synchronized (lock) {
             // Allowed only once.
@@ -102,6 +115,9 @@ public class DefaultIOFuture implements IOFuture {
         }
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public void setListener(IoFutureListener listener) {
         this.listener = listener;
@@ -110,14 +126,14 @@ public class DefaultIOFuture implements IOFuture {
         }
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public void removeListener() {
         this.listener = null;
     }
 
-    /**
-     * Notify the listeners, if we have some.
-     */
     private void notifyListener() {
         if (listener != null) {
             listener.onComplete(this);
@@ -161,11 +177,17 @@ public class DefaultIOFuture implements IOFuture {
         }
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public boolean await(long timeout, TimeUnit unit) throws InterruptedException {
         return await0(unit.toMillis(timeout), true);
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public boolean await(long timeoutMillis) throws InterruptedException {
         return await0(timeoutMillis, true);
@@ -190,10 +212,7 @@ public class DefaultIOFuture implements IOFuture {
                 for (;;) {
                     try {
                         long timeOut = Math.min(timeoutMillis, DEAD_LOCK_CHECK_INTERVAL);
-
-                        // Wait for the requested period of time,
-                        // but every DEAD_LOCK_CHECK_INTERVAL seconds, we will
-                        // check that we aren't blocked.
+                        // but every DEAD_LOCK_CHECK_INTERVAL seconds, we will check dead lock
                         lock.wait(timeOut);
                     } catch (InterruptedException e) {
                         if (interruptable) {
@@ -224,8 +243,11 @@ public class DefaultIOFuture implements IOFuture {
     }
 
     /**
-     * Check for a deadlock, avoid to await in a processor thread which is responsible for
-     * commiting a result to this IOFuture instance.
+     * Check for a deadlock, avoid to await in a thread which is responsible for
+     * commiting a result
+     *
+     * I haven't implement it by now, so you should be careful when use an IOFuture.
+     * As what I mentioned above, Never wait and commit it in the same thread.
      */
     private void checkDeadLock() {
 

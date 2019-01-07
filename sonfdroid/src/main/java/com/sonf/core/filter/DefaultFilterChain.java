@@ -16,20 +16,30 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
+/**
+ * Default implementation of {@link IFilterChain}
+ * used in each session, it will be built when session is ready for I/O operations.
+ * All filters added into this chain is selected out from controller's {@link FilterChainBuilder}
+ */
 public class DefaultFilterChain implements IFilterChain {
+    /** used to store a {@link ConnectFuture} into session's Attribute Map */
     public static final AttributeKey SESSION_CREATED_FUTURE = new AttributeKey(DefaultFilterChain.class, "connectFuture");
-    public static final AttributeKey SESSION_DECODER_OUT = new AttributeKey(DefaultFilterChain.class, "decoderOut");
-    public static final AttributeKey SESSION_ENCODER_OUT = new AttributeKey(DefaultFilterChain.class, "encoderOut");
+    /** associated session */
     private final AbstractIOSession session;
+
     /** The chain head */
     private final EntryImpl head;
-
     /** The chain tail */
     private final EntryImpl tail;
-
     /** The mapping between the filters and their associated name */
     private final Map<String, Entry> name2entry = new ConcurrentHashMap<String, Entry>();
 
+    /**
+     * Constructor of DefaultFilterChain .
+     * Add HeadFilter and TailFilter into the chain.
+     *
+     * @param session the associated session
+     */
     public DefaultFilterChain(AbstractIOSession session) {
         if (session == null) {
             throw new IllegalArgumentException("session");
@@ -42,7 +52,7 @@ public class DefaultFilterChain implements IFilterChain {
 
     /**
      * {@inheritDoc}
-     * */
+     */
     @Override
     public IOSession getSession() {
         return session;
@@ -50,18 +60,24 @@ public class DefaultFilterChain implements IFilterChain {
 
     /**
      * {@inheritDoc}
-     * */
+     */
     @Override
     public synchronized void addLast(String name, IFilter filter) {
         checkAddable(name);
         register(tail.prevEntry, name, filter);
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public boolean contains(IFilter filter) {
         return getEntry(filter) != null;
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public synchronized void clear() {
         List<Entry> list = new ArrayList<Entry>(name2entry.values());
@@ -71,47 +87,74 @@ public class DefaultFilterChain implements IFilterChain {
         }
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public void fireSessionOpened() {
         callNextSessionOpened(head, session);
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public void fireSessionClosed() {
         callNextSessionClosed(head, session);
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public void fireExceptionCaught(Throwable cause) {
         callNextExceptionCaught(head, session, cause);
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public void fireMessageSent(IWritePacket packet) {
         packet.getFuture().setWritten();
         callNextMessageSent(head, session, packet);
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public void fireInputClosed() {
         callNextInputClosed(head, session);
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public void fireMessageReceived(Object message) {
         callNextMessageReceived(head, session, message);
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public void fireFilterClose() {
         callPreviousFilterClose(tail, session);
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public void fireFilterWrite(IWritePacket writePacket) {
         callPreviousFilterWrite(tail, session, writePacket);
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public void fireSessionIdle(IdleStatus status) {
         session.increaseIdleCount(status, SystemClock.elapsedRealtime());
@@ -177,7 +220,6 @@ public class DefaultFilterChain implements IFilterChain {
         }
     }
 
-
     private void callPreviousFilterClose(Entry entry, IOSession session) {
         IFilter filter = entry.getFilter();
         filter.filterClose(entry.getPrevEntry(), session);
@@ -196,6 +238,7 @@ public class DefaultFilterChain implements IFilterChain {
             throw e;
         }
     }
+
     /**
      * Register the newly added filter, inserting it between the previous and
      * the next filter in the filter's chain. We also call the preAdd and
@@ -309,8 +352,6 @@ public class DefaultFilterChain implements IFilterChain {
         public void sessionClosed(Entry next, IOSession session) {
             session.setStateClosed();
             session.getFilterChain().clear();
-            session.removeAttribute(SESSION_DECODER_OUT);
-            session.removeAttribute(SESSION_ENCODER_OUT);
             session.getController().getHandler().sessionClosed(session);
         }
 
