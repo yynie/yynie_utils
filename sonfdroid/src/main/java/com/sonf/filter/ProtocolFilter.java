@@ -6,6 +6,7 @@ import com.sonf.core.filter.IFilterChain;
 import com.sonf.core.session.AttributeKey;
 import com.sonf.core.session.IOSession;
 import com.sonf.core.write.IWritePacket;
+import com.yynie.myutils.Logger;
 
 import java.io.IOException;
 import java.util.concurrent.atomic.AtomicReference;
@@ -15,6 +16,7 @@ import java.util.concurrent.atomic.AtomicReference;
  * message objects and vice versa using {@link IProtocolEncoder}, or {@link IProtocolDecoder}.
  */
 public class ProtocolFilter extends IFilterAdapter {
+    private final Logger log = Logger.get(ProtocolFilter.class, Logger.Level.INFO);
     public static final AttributeKey DECODER_OUT = new AttributeKey(ProtocolFilter.class, "decoderOut");
     public static final AttributeKey ENCODER_OUT = new AttributeKey(ProtocolFilter.class, "encoderOut");
     private IProtocolEncoder encoder;
@@ -178,6 +180,9 @@ public class ProtocolFilter extends IFilterAdapter {
                 // Call the decoder with the read bytes
                 try {
                     decoder.decode(session, in, decoderOut);
+                    if(oldPos == in.position()){
+                        log.e("messageReceived: message buf stays in the old position after Decoder. Your Decoder may not do its job correctly!");
+                    }
                     Object decoded = decoderOut.get();
                     if (decoded != null) {
                         next.getFilter().messageReceived(next.getNextEntry(), session, decoded);

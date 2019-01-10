@@ -222,7 +222,6 @@ public class NioSession extends AbstractIOSession<SocketChannel, NioSocketConfig
         @Override
         public void setSoLinger(int linger) {
             super.setSoLinger(linger);
-            log.i("setSoLinger: old = " + getSoLinger());
             try {
                 if (linger < 0) {
                     getSocket().setSoLinger(false, 0);
@@ -232,6 +231,7 @@ public class NioSession extends AbstractIOSession<SocketChannel, NioSocketConfig
             } catch (SocketException e) {
                 throw new RuntimeIoException(e);
             }
+            log.i("setSoLinger: = " + getSoLinger());
         }
 
         /**
@@ -252,7 +252,7 @@ public class NioSession extends AbstractIOSession<SocketChannel, NioSocketConfig
         @Override
         public void setSendBufferSize(int size) {
             super.setSendBufferSize(size);
-            log.i("setSendBufferSize: old = " + getSendBufferSize());
+//            log.i("setSendBufferSize: old = " + getSendBufferSize());
             if(size > 0) {
                 try {
                     getSocket().setSendBufferSize(size);
@@ -280,7 +280,7 @@ public class NioSession extends AbstractIOSession<SocketChannel, NioSocketConfig
         @Override
         public void setReceiveBufferSize(int size) {
             super.setReceiveBufferSize(size);
-            log.i("setReceiveBufferSize: old = " + getReceiveBufferSize());
+//            log.i("setReceiveBufferSize: old = " + getReceiveBufferSize());
             if(size > 0) {
                 try {
                     getSocket().setReceiveBufferSize(size);

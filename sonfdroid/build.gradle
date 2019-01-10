@@ -3,11 +3,9 @@ apply plugin: 'com.android.library'
 android {
     compileSdkVersion 19
 
-
-
     defaultConfig {
         minSdkVersion 19
-        targetSdkVersion 19
+
         versionCode 1
         versionName "1.0"
     }
@@ -20,6 +18,16 @@ android {
     }
     buildToolsVersion '28.0.3'
 }
+
+task makeJar(type:Copy){
+    delete 'build/outputs/libs/sonfdroid_1_0.jar'
+    from('build/intermediates/packaged-classes/release/')
+    into('build/outputs/libs/')
+    include('classes.jar')
+    rename('classes.jar','sonfdroid_1_0.jar')
+}
+
+makeJar.dependsOn(build)
 
 dependencies {
     compileOnly files('libs/yynieutils.jar')

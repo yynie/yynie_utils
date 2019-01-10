@@ -276,6 +276,7 @@ public abstract class AbstractPollingIoProcessor <S extends AbstractIOSession> i
         }
 
         private void readFrom(S session) {
+            log.i("readFrom: session id=" + session.getId());
             IoBuffer buf = session.getReadIOBuffer();
             buf.clear();
             try {
@@ -291,6 +292,7 @@ public abstract class AbstractPollingIoProcessor <S extends AbstractIOSession> i
                 } finally {
                     buf.flip();
                 }
+                log.i("readFrom:readBytes = " + readBytes);
                 if (readBytes > 0) {
                     session.updateReadTime(SystemClock.elapsedRealtime());
                     session.getFilterChain().fireMessageReceived(buf);
