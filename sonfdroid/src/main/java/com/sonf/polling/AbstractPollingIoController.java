@@ -454,7 +454,19 @@ public abstract class AbstractPollingIoController<S extends AbstractIOSession, C
     }
 
     /**
+     * build a IOSession connected to specified host:port,
+     * use the controller's configuration  as the base config
+     *
+     * @param host the host domain of remote endpoint this session will
+     *                      connect to lately.
+     * @param port the port on which the remote endpoint listened for connections.
+     * @return An IOSession instance.
+     */
+    protected abstract S buildSession(String host, Integer port);
+
+    /**
      * build a IOSession connected to specified host:port
+     * with the specified configuration
      *
      * @param host the host domain of remote endpoint this session will
      *                      connect to lately.

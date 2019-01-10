@@ -73,7 +73,11 @@ public class NioChannelController extends AbstractPollingIoController<NioSession
         setSelectable(false);
     }
 
-    public IOSession buildSession(String host, Integer port){
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public NioSession buildSession(String host, Integer port){
         return buildSession(host, port, getConfig().clone());
     }
 
