@@ -78,8 +78,6 @@ public abstract class IoBuffer {
 
     /**
      * @see java.nio.Buffer#flip()
-     *
-     * @return the modified IoBuffer
      */
     public void clear(){
         buf().clear();
@@ -103,8 +101,6 @@ public abstract class IoBuffer {
      * @see java.nio.Buffer#limit(int)
      *
      * @param newLimit The new buffer's limit
-     * @return the modified IoBuffer
-
      */
     public void limit(int newLimit){
         buf().limit(newLimit);
@@ -132,8 +128,6 @@ public abstract class IoBuffer {
      * @see java.nio.Buffer#position(int)
      *
      * @param newPosition Sets the new position in the buffer
-     * @return the modified IoBuffer
-
      */
     public void position(int newPosition){
         buf().position(newPosition);
@@ -179,7 +173,6 @@ public abstract class IoBuffer {
      *
      * @param val The CharSequence to put in the IoBuffer
      * @param encoder The CharsetEncoder to use
-     * @return The modified IoBuffer
      * @throws CharacterCodingException When we have an error while decoding the String
      */
     public abstract void putString(CharSequence val, CharsetEncoder encoder) throws CharacterCodingException;

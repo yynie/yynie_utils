@@ -1,5 +1,6 @@
 package com.sonf.nio;
 
+import com.sonf.core.IOController;
 import com.sonf.core.RuntimeIoException;
 import com.sonf.core.buffer.IoBuffer;
 import com.sonf.polling.AbstractPollingIoProcessor;
@@ -25,12 +26,11 @@ public class NioProcessor extends AbstractPollingIoProcessor<NioSession> {
     private final Logger log = Logger.get(NioProcessor.class, Logger.Level.INFO);
     /** The selector associated with this processor */
     private Selector selector;
-
     /**
      * Constructor
      *
      * @param executor The executor to use.
-     *                 It should be the same one with {@limk IOController}
+     *                 It should be the same one with {@link IOController}
      */
     public NioProcessor(Executor executor) {
         super(executor);
