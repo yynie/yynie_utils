@@ -11,6 +11,7 @@ import com.sonf.core.session.AbstractIOSession;
 import com.sonf.core.session.IOConfig;
 import com.sonf.core.session.IOSession;
 import com.sonf.core.write.IWritePacket;
+import com.sonf.core.write.WriteException;
 import com.sonf.future.ConnectFuture;
 import com.yynie.myutils.Logger;
 
@@ -563,7 +564,7 @@ public abstract class AbstractPollingIoProcessor <S extends AbstractIOSession> i
         }
 
         if (!failedList.isEmpty()) {
-            Throwable cause = new IllegalStateException("Trying to write a message to a closed session");
+            Throwable cause = new WriteException("Trying to write a message to a closed session");
             for (IWritePacket p : failedList) {
                 p.getFuture().setException(cause);
             }

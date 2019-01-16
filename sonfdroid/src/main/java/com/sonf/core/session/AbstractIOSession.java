@@ -15,7 +15,9 @@ import com.sonf.core.future.IConnectFuture;
 import com.sonf.core.future.IOFuture;
 import com.sonf.core.future.IWriteFuture;
 import com.sonf.core.write.IWritePacket;
+import com.sonf.core.write.WriteException;
 import com.sonf.core.write.WritePacket;
+import com.sonf.core.write.WriteTimeOutException;
 import com.sonf.socket.AbstractSocketConfig;
 
 import java.io.IOException;
@@ -123,12 +125,6 @@ public abstract class AbstractIOSession<CH, CG extends AbstractIOConfig> impleme
         // Set a new ID for this session
         sessionId = idGenerator.incrementAndGet();
         if(sessionId >= (Long.MAX_VALUE -1)) idGenerator.set(0L);
-        long elapsedTime = SystemClock.elapsedRealtime();
-        lastReadTime = elapsedTime;
-        lastWriteTime = elapsedTime;
-        lastIdleTimeForBoth = elapsedTime;
-        lastIdleTimeForRead = elapsedTime;
-        lastIdleTimeForWrite = elapsedTime;
     }
 
     /**
@@ -240,7 +236,7 @@ public abstract class AbstractIOSession<CH, CG extends AbstractIOConfig> impleme
             IWritePacket packet = getCurrentWritePacket();
             if (packet != null && (curElapsedTime - packet.getStartTime()) >= writeTimeout) {
                 setCurrentWritePacket(null);
-                Throwable cause = new IOException("Write Timeout");
+                Throwable cause = new WriteTimeOutException("Write Timeout");
                 packet.getFuture().setException(cause);
                 getFilterChain().fireExceptionCaught(cause);
                 // WriteException is an IOException, so we close the session.
@@ -331,6 +327,12 @@ public abstract class AbstractIOSession<CH, CG extends AbstractIOConfig> impleme
         applySessionConfig();
         prepareAttributeMap();
         prepareWriteQueue();
+        long elapsedTime = SystemClock.elapsedRealtime();
+        lastReadTime = elapsedTime;
+        lastWriteTime = elapsedTime;
+        lastIdleTimeForBoth = elapsedTime;
+        lastIdleTimeForRead = elapsedTime;
+        lastIdleTimeForWrite = elapsedTime;
     }
 
 
@@ -652,7 +654,7 @@ public abstract class AbstractIOSession<CH, CG extends AbstractIOConfig> impleme
                     // The WriteRequest may not always have a future : The CLOSE_REQUEST
                     // and MESSAGE_SENT_REQUEST don't.
                     if (writeFuture != null) {
-                        Throwable cause = new IOException("session closed!");
+                        Throwable cause = new WriteException("session closed!");
                         writeFuture.setException(cause);
                     }
                 }
@@ -671,7 +673,7 @@ public abstract class AbstractIOSession<CH, CG extends AbstractIOConfig> impleme
 
         IWriteFuture future = getNewWriteFuture();
         if(!isReady()){
-            future.setException(new IllegalStateException("Trying to write a message to a closed session"));
+            future.setException(new WriteException("Trying to write a message to a closed session"));
             return future;
         }
 
