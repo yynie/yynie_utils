@@ -52,6 +52,6 @@ public class IOHandlerAdapter implements IOHandler {
 
     @Override
     public void sessionIdle(IOSession session, IdleStatus status) throws Exception {
-        log.w("sessionIdle : id = " + session.getId() + "status =" + status);
+       // log.w("sessionIdle : id = " + session.getId() + ", status =" + status);
     }
 }
