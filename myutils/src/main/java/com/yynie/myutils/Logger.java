@@ -111,6 +111,7 @@ public class Logger {
 
     private final String TAG;
     private final Level LEVEL;
+    private static String SUB_HEAD;
 
     /**
      * Create a Logger instance for one Class in which scope you want to use Looger to print log
@@ -154,6 +155,11 @@ public class Logger {
         return true;
     }
 
+    public static boolean setGlobalHead(String subHead){
+        SUB_HEAD = subHead;
+        return true;
+    }
+
     /**
      * set global level with the Level's integer value. It will take effect immediately.
      * @param levelValue
@@ -176,13 +182,21 @@ public class Logger {
         return higher.isAllow(check);
     }
 
+    private String wrapOutputMessage(String message){
+        if(SUB_HEAD != null){
+            return (SUB_HEAD + " : " + message);
+        }else{
+            return message;
+        }
+    }
+
     /**
      * log a message at DEBUG level
      *
      * @param debug debug message
      * */
     public void d (String debug){
-        if(isLevelAllowed(Level.DEBUG)) Log.d(TAG, debug);
+        if(isLevelAllowed(Level.DEBUG)) Log.d(TAG,  wrapOutputMessage(debug));
     }
 
     /**
@@ -191,7 +205,7 @@ public class Logger {
      * @param info info message
      * */
     public void i (String info){
-        if(isLevelAllowed(Level.INFO)) Log.i(TAG, info);
+        if(isLevelAllowed(Level.INFO)) Log.i(TAG,  wrapOutputMessage(info));
     }
 
     /**
@@ -200,7 +214,7 @@ public class Logger {
      * @param warning warning message
      * */
     public void w (String warning){
-        if(isLevelAllowed(Level.WARN)) Log.w(TAG, warning);
+        if(isLevelAllowed(Level.WARN)) Log.w(TAG,  wrapOutputMessage(warning));
     }
 
     /**
@@ -209,7 +223,7 @@ public class Logger {
      * @param error error message
      * */
     public void e (String error){
-        if(isLevelAllowed(Level.ERROR)) Log.e(TAG, error);
+        if(isLevelAllowed(Level.ERROR)) Log.e(TAG,  wrapOutputMessage(error));
     }
 
     /**
