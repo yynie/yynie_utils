@@ -32,7 +32,7 @@ import java.util.concurrent.atomic.AtomicReference;
  *  Polling implementation of {@link IOProcessor} to handle I/O operations for sessions
  */
 public abstract class AbstractPollingIoProcessor <S extends AbstractIOSession> implements IOProcessor<S> {
-    private Logger log = Logger.get(AbstractPollingIoProcessor.class, Logger.Level.INFO);
+    private Logger log = Logger.get(AbstractPollingIoProcessor.class, Logger.Level.DEBUG);
     private final Object disposalLock = new Object();
     private volatile boolean disposing;
     private volatile boolean disposed;

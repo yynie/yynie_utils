@@ -29,7 +29,7 @@ import java.util.concurrent.atomic.AtomicReference;
  * Inheriting class of {@link AbstractIOController}.
  */
 public abstract class AbstractPollingIoController<S extends AbstractIOSession, CH> extends AbstractIOController<S> {
-    private Logger log = Logger.get(AbstractPollingIoController.class, Logger.Level.INFO);
+    private Logger log = Logger.get(AbstractPollingIoController.class, Logger.Level.DEBUG);
 
     private AbstractIOConfig config;
     private boolean isSecure = false; //default false
