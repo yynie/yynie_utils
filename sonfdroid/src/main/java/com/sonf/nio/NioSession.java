@@ -30,7 +30,7 @@ import java.nio.channels.SocketChannel;
  * Inheriting the class of {@link AbstractIOSession}
  */
 public class NioSession extends AbstractIOSession<SocketChannel, NioSocketConfig> {
-    private Logger log = Logger.get(NioSession.class, Logger.Level.DEBUG);
+    private Logger log = Logger.get(NioSession.class, Logger.Level.INFO);
     private InetSocketAddress remoteAddress;
     private String host;
     private int port;

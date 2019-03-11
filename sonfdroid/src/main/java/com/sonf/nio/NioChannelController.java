@@ -24,7 +24,7 @@ import java.util.concurrent.Executor;
  *  Inheriting class of {@link AbstractPollingIoController}.
  */
 public class NioChannelController extends AbstractPollingIoController<NioSession, SocketChannel> {
-    private Logger log = Logger.get(NioChannelController.class, Logger.Level.DEBUG);
+    private Logger log = Logger.get(NioChannelController.class, Logger.Level.INFO);
     private volatile Selector selector;
 
     /**

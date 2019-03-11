@@ -23,7 +23,7 @@ import java.util.concurrent.Executor;
  * Inheriting class of {@link AbstractPollingIoProcessor}.
  */
 public class NioProcessor extends AbstractPollingIoProcessor<NioSession> {
-    private final Logger log = Logger.get(NioProcessor.class, Logger.Level.DEBUG);
+    private final Logger log = Logger.get(NioProcessor.class, Logger.Level.INFO);
     /** The selector associated with this processor */
     private Selector selector;
     /**
