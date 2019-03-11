@@ -155,7 +155,7 @@ public abstract class AbstractPollingIoController<S extends AbstractIOSession, C
      *          Set to false when the controller will be destroyed.
      */
     public void setSelectable(boolean selectable) {
-        log.i("setSelectable " + selectable);
+        log.d("setSelectable " + selectable);
         this.selectable = selectable;
     }
 
@@ -433,7 +433,7 @@ public abstract class AbstractPollingIoController<S extends AbstractIOSession, C
                     log.e("processCancelQueue::Invalid future with a NULL session");
                     break;
                 }
-                log.i("processCancelQueue session:" + session.getId());
+                log.d("processCancelQueue session:" + session.getId());
                 CH ch = (CH) session.getChannel();
                 try {
                     closeChannel(ch);

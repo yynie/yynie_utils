@@ -68,7 +68,7 @@ public class NioChannelController extends AbstractPollingIoController<NioSession
         if (selector != null) {
             selector.close();
             selector = null;
-            log.i("destroy: selector closed");
+            log.d("destroy: selector closed");
         }
         setSelectable(false);
     }
@@ -131,11 +131,11 @@ public class NioChannelController extends AbstractPollingIoController<NioSession
      */
     @Override
     protected void closeChannel(SocketChannel channel) throws IOException {
-        log.i("closeChannel in" );
+        log.d("closeChannel in" );
         SelectionKey key = channel.keyFor(selector);
 
         if (key != null) {
-            log.i("closeChannel  key canceled");
+            log.d("closeChannel  key canceled");
             key.cancel();
         }
 

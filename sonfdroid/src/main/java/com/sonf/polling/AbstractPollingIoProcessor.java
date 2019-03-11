@@ -277,7 +277,7 @@ public abstract class AbstractPollingIoProcessor <S extends AbstractIOSession> i
         }
 
         private void readFrom(S session) {
-            log.i("readFrom: session id=" + session.getId());
+            log.d("readFrom: session id=" + session.getId());
             IoBuffer buf = session.getReadIOBuffer();
             buf.clear();
             try {
@@ -577,7 +577,7 @@ public abstract class AbstractPollingIoProcessor <S extends AbstractIOSession> i
         if (managedSessions.putIfAbsent(session.getId(), session) != null) {
             return;
         }
-        log.i("addManagedSession: session added id=" + session.getId());
+        log.d("addManagedSession: session added id=" + session.getId());
         if(firstAdded) session.getController().activate();
         session.getFilterChain().fireSessionOpened();
     }

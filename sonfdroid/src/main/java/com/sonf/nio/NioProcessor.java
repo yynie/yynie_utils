@@ -142,7 +142,7 @@ public class NioProcessor extends AbstractPollingIoProcessor<NioSession> {
         SelectionKey key = session.getSelectionKey();
 
         if (key != null) {
-            log.i("destroy  key canceled");
+            log.d("destroy  key canceled");
             key.cancel();
         }
 
@@ -260,7 +260,7 @@ public class NioProcessor extends AbstractPollingIoProcessor<NioSession> {
     protected void doDispose() throws Exception {
         selector.close();
         selector = null;
-        log.i("doDispose: selector closed");
+        log.d("doDispose: selector closed");
     }
 
     /**

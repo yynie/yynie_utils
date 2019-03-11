@@ -231,7 +231,7 @@ public class NioSession extends AbstractIOSession<SocketChannel, NioSocketConfig
             } catch (SocketException e) {
                 throw new RuntimeIoException(e);
             }
-            log.i("setSoLinger: = " + getSoLinger());
+            log.d("setSoLinger: = " + getSoLinger());
         }
 
         /**
