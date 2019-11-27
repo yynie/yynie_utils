@@ -112,6 +112,7 @@ public class Logger {
     private final String TAG;
     private final Level LEVEL;
     private static String SUB_HEAD;
+    private static String GLOBAL_TAG = null;
 
     /**
      * Create a Logger instance for one Class in which scope you want to use Looger to print log
@@ -155,8 +156,27 @@ public class Logger {
         return true;
     }
 
-    public static boolean setGlobalHead(String subHead){
+    /**
+     * set global sub header. so your log string will be prefixed by this subHead string.
+     * this setting takes effect only when GlobalTag is Null
+     * @see Logger#setGlobalTag(String)
+     *
+     * @param subHead,
+     * */
+    public static boolean setGlobalSubHead(String subHead){
         SUB_HEAD = subHead;
+        return true;
+    }
+
+    /**
+     * set global TAG.
+     * If global TAG is set, it will used as the log TAG instead of the
+     * simple name of the Class who owns this Logger instance.
+     *
+     * @param tag,
+     * */
+    public static boolean setGlobalTag(String tag){
+        GLOBAL_TAG = tag;
         return true;
     }
 
@@ -183,6 +203,9 @@ public class Logger {
     }
 
     private String wrapOutputMessage(String message){
+        if(GLOBAL_TAG != null && !GLOBAL_TAG.trim().isEmpty()){
+            return (TAG + "::" + message);
+        }
         if(SUB_HEAD != null){
             return (SUB_HEAD + " : " + message);
         }else{
@@ -190,13 +213,17 @@ public class Logger {
         }
     }
 
+    private String getTag(){
+        if(GLOBAL_TAG != null && !GLOBAL_TAG.trim().isEmpty()) return GLOBAL_TAG;
+        return TAG;
+    }
     /**
      * log a message at DEBUG level
      *
      * @param debug debug message
      * */
     public void d (String debug){
-        if(isLevelAllowed(Level.DEBUG)) Log.d(TAG,  wrapOutputMessage(debug));
+        if(isLevelAllowed(Level.DEBUG)) Log.d(getTag(),  wrapOutputMessage(debug));
     }
 
     /**
@@ -205,7 +232,7 @@ public class Logger {
      * @param info info message
      * */
     public void i (String info){
-        if(isLevelAllowed(Level.INFO)) Log.i(TAG,  wrapOutputMessage(info));
+        if(isLevelAllowed(Level.INFO)) Log.i(getTag(),  wrapOutputMessage(info));
     }
 
     /**
@@ -214,7 +241,7 @@ public class Logger {
      * @param warning warning message
      * */
     public void w (String warning){
-        if(isLevelAllowed(Level.WARN)) Log.w(TAG,  wrapOutputMessage(warning));
+        if(isLevelAllowed(Level.WARN)) Log.w(getTag(),  wrapOutputMessage(warning));
     }
 
     /**
@@ -223,7 +250,7 @@ public class Logger {
      * @param error error message
      * */
     public void e (String error){
-        if(isLevelAllowed(Level.ERROR)) Log.e(TAG,  wrapOutputMessage(error));
+        if(isLevelAllowed(Level.ERROR)) Log.e(getTag(),  wrapOutputMessage(error));
     }
 
     /**

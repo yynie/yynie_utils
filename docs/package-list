@@ -1,12 +1,1 @@
-com.sonf.core
-com.sonf.core.buffer
-com.sonf.core.filter
-com.sonf.core.future
-com.sonf.core.session
-com.sonf.core.write
-com.sonf.filter
-com.sonf.future
-com.sonf.nio
-com.sonf.polling
-com.sonf.socket
 com.yynie.myutils
